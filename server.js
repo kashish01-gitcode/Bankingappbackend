@@ -23,7 +23,7 @@ const app = express();
 app.use(cors({
   origin: [
       "http://localhost:5173",
-      "https://your-app.vercel.app"
+      "https://bankingappfrontend1.vercel.app/login"
     ],
     credentials: true
 }
