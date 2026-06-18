@@ -5,7 +5,7 @@ const router = express.Router();
 const {
   getDashboardStats,
   getAllUsers,
-} = require('../controllers/adminController');
+} = require('../controllers/admincontroller');
 
 const {
   protect,
