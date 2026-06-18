@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
       minlength: [2, 'Full name must be at least 2 characters'],
       maxlength: [100, 'Full name must not exceed 100 characters'],
     },
+
     email: {
       type: String,
       required: [true, 'Email is required'],
@@ -19,21 +20,70 @@ const userSchema = new mongoose.Schema(
       trim: true,
       validate: [validator.isEmail, 'Please provide a valid email'],
     },
+
     password: {
       type: String,
       required: [true, 'Password is required'],
       minlength: [8, 'Password must be at least 8 characters'],
       select: false,
     },
+
+    profileImage: {
+  type: String,
+  default: ''
+      },
+
+    aadharNumber: {
+      type: String,
+      required: [true, 'Aadhar number is required'],
+      unique: true,
+      validate: {
+        validator: function (v) {
+          return /^\d{12}$/.test(v);
+        },
+        message: 'Aadhar number must be exactly 12 digits',
+      },
+    },
+
     role: {
       type: String,
-      enum: { values: ['user', 'admin'], message: 'Role must be either user or admin' },
+      enum: {
+        values: ['user', 'admin'],
+        message: 'Role must be either user or admin',
+      },
       default: 'user',
     },
+
+    isVerified: {
+  type: Boolean,
+  default: false,
+},
+
+otp: {
+  type: String,
+  select: false,
+},
+
+otpExpiry: {
+  type: Date,
+  select: false,
+},
+
+    branchName: {
+      type: String,
+      default: 'Indore Main Branch',
+    },
+
+    ifscCode: {
+      type: String,
+      default: 'SBIN0001234',
+    },
+
     isActive: {
       type: Boolean,
       default: true,
     },
+
     lastLogin: {
       type: Date,
     },
@@ -45,26 +95,35 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Virtual populate for accounts
 userSchema.virtual('accounts', {
   ref: 'Account',
   localField: '_id',
   foreignField: 'userId',
 });
 
-// Hash password before saving
+userSchema.index({ email: 1 });
+
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
-  const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
-  this.password = await bcrypt.hash(this.password, saltRounds);
+
+  const saltRounds =
+    parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
+
+  this.password = await bcrypt.hash(
+    this.password,
+    saltRounds
+  );
 });
 
-// Instance method to compare passwords
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+userSchema.methods.comparePassword = async function (
+  candidatePassword
+) {
+  return await bcrypt.compare(
+    candidatePassword,
+    this.password
+  );
 };
 
-// Remove sensitive fields from JSON output
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
