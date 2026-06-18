@@ -5,7 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./src/config/database');
-const { generalLimiter } = require('./src/middleware/rateLimiter');
+const { generalLimiter } = require('./src/middleware/ratelimiter');
 const { errorHandler, notFound } = require('./src/middleware/errorHandler');
 
 // Route imports
